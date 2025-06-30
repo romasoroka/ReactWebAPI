@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ReactWebAPI.Data;
 
@@ -11,9 +12,11 @@ using ReactWebAPI.Data;
 namespace ReactWebAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250628114505_DtosAdded")]
+    partial class DtosAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,51 +24,6 @@ namespace ReactWebAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CredentialProject", b =>
-                {
-                    b.Property<int>("CredentialsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CredentialsId", "ProjectsId");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.ToTable("CredentialProject");
-                });
-
-            modelBuilder.Entity("EmployeeProject", b =>
-                {
-                    b.Property<int>("EmployeesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("EmployeesId", "ProjectsId");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.ToTable("EmployeeProject");
-                });
-
-            modelBuilder.Entity("ProjectTechnology", b =>
-                {
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TechnologiesId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProjectsId", "TechnologiesId");
-
-                    b.HasIndex("TechnologiesId");
-
-                    b.ToTable("ProjectTechnology");
-                });
 
             modelBuilder.Entity("ReactWebAPI.Models.Credential", b =>
                 {
@@ -115,6 +73,19 @@ namespace ReactWebAPI.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("YearsOfExperience")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Employees");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.EmployeeStats", b =>
+                {
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ProjectsInvolved")
                         .HasColumnType("int");
 
@@ -124,12 +95,9 @@ namespace ReactWebAPI.Migrations
                     b.Property<int>("TotalHoursWorked")
                         .HasColumnType("int");
 
-                    b.Property<int>("YearsOfExperience")
-                        .HasColumnType("int");
+                    b.HasKey("EmployeeId");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Employees");
+                    b.ToTable("EmployeeStats");
                 });
 
             modelBuilder.Entity("ReactWebAPI.Models.Project", b =>
@@ -139,9 +107,6 @@ namespace ReactWebAPI.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ActiveEmployees")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("Budget")
                         .HasColumnType("decimal(18,2)");
@@ -164,21 +129,82 @@ namespace ReactWebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ReportCount")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("TotalHoursLogged")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.ProjectAnalytics", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ActiveEmployees")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReportCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalHoursLogged")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectId");
+
+                    b.ToTable("ProjectAnalytics");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.ProjectCredential", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CredentialId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectId", "CredentialId");
+
+                    b.HasIndex("CredentialId");
+
+                    b.ToTable("ProjectCredentials");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.ProjectEmployee", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectId", "EmployeeId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("ProjectEmployees");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.ProjectTechnology", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TechnologyId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectId", "TechnologyId");
+
+                    b.HasIndex("TechnologyId");
+
+                    b.ToTable("ProjectTechnologies");
                 });
 
             modelBuilder.Entity("ReactWebAPI.Models.Technology", b =>
@@ -234,61 +260,57 @@ namespace ReactWebAPI.Migrations
                     b.ToTable("WorkSessions");
                 });
 
-            modelBuilder.Entity("CredentialProject", b =>
-                {
-                    b.HasOne("ReactWebAPI.Models.Credential", null)
-                        .WithMany()
-                        .HasForeignKey("CredentialsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ReactWebAPI.Models.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("EmployeeProject", b =>
-                {
-                    b.HasOne("ReactWebAPI.Models.Employee", null)
-                        .WithMany()
-                        .HasForeignKey("EmployeesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ReactWebAPI.Models.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ProjectTechnology", b =>
-                {
-                    b.HasOne("ReactWebAPI.Models.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ReactWebAPI.Models.Technology", null)
-                        .WithMany()
-                        .HasForeignKey("TechnologiesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ReactWebAPI.Models.WorkSession", b =>
+            modelBuilder.Entity("ReactWebAPI.Models.EmployeeStats", b =>
                 {
                     b.HasOne("ReactWebAPI.Models.Employee", "Employee")
-                        .WithMany("WorkSessions")
+                        .WithOne("Stats")
+                        .HasForeignKey("ReactWebAPI.Models.EmployeeStats", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.ProjectAnalytics", b =>
+                {
+                    b.HasOne("ReactWebAPI.Models.Project", "Project")
+                        .WithOne("Analytics")
+                        .HasForeignKey("ReactWebAPI.Models.ProjectAnalytics", "ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.ProjectCredential", b =>
+                {
+                    b.HasOne("ReactWebAPI.Models.Credential", "Credential")
+                        .WithMany("ProjectCredentials")
+                        .HasForeignKey("CredentialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ReactWebAPI.Models.Project", "Project")
+                        .WithMany("Credentials")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Credential");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.ProjectEmployee", b =>
+                {
+                    b.HasOne("ReactWebAPI.Models.Employee", "Employee")
+                        .WithMany("ProjectEmployees")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ReactWebAPI.Models.Project", "Project")
-                        .WithMany()
+                        .WithMany("ProjectEmployees")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -298,9 +320,74 @@ namespace ReactWebAPI.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("ReactWebAPI.Models.ProjectTechnology", b =>
+                {
+                    b.HasOne("ReactWebAPI.Models.Project", "Project")
+                        .WithMany("Technologies")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ReactWebAPI.Models.Technology", "Technology")
+                        .WithMany("ProjectTechnologies")
+                        .HasForeignKey("TechnologyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Technology");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.WorkSession", b =>
+                {
+                    b.HasOne("ReactWebAPI.Models.Employee", "Employee")
+                        .WithMany("WorkSessions")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ReactWebAPI.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.Credential", b =>
+                {
+                    b.Navigation("ProjectCredentials");
+                });
+
             modelBuilder.Entity("ReactWebAPI.Models.Employee", b =>
                 {
+                    b.Navigation("ProjectEmployees");
+
+                    b.Navigation("Stats")
+                        .IsRequired();
+
                     b.Navigation("WorkSessions");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.Project", b =>
+                {
+                    b.Navigation("Analytics")
+                        .IsRequired();
+
+                    b.Navigation("Credentials");
+
+                    b.Navigation("ProjectEmployees");
+
+                    b.Navigation("Technologies");
+                });
+
+            modelBuilder.Entity("ReactWebAPI.Models.Technology", b =>
+                {
+                    b.Navigation("ProjectTechnologies");
                 });
 #pragma warning restore 612, 618
         }

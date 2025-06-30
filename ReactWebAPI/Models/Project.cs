@@ -1,23 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace ReactWebAPI.Models
 {
     public class Project
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string Status { get; set; }
-        public List<string> Technologies { get; set; } = new();
-        public string Description { get; set; }
-        public List<Employee> Programmers { get; set; } = new();
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
-        public string Budget { get; set; }
-        public string Client { get; set; }
-        public string DetailedDescription { get; set; }
-        [ValidateNever]
-        public List<Credential> Credentials { get; set; }
-        public ProjectAnalytics Analytics { get; set; }
+        [Required]
+        public string Name { get; set; } = null!;
+        public ProjectStatus Status { get; set; }
+        [Required]
+        public string Description { get; set; } = null!;
+        public string? DetailedDescription { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public decimal Budget { get; set; }
+        [Required]
+        public string Client { get; set; } = null!;
+        public int TotalHoursLogged { get; set; }
+        public int ReportCount { get; set; }
+        public int ActiveEmployees { get; set; }
+        public List<Technology> Technologies { get; set; } = new List<Technology>();
+        public List<Credential> Credentials { get; set; } = new List<Credential>();
+        public List<Employee> Employees { get; set; } = new List<Employee>();
     }
 
 }

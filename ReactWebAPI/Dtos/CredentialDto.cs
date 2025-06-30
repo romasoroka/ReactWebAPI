@@ -1,15 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ReactWebAPI.Models
+namespace ReactWebAPI.Dtos
 {
-    public class Credential
+    public class CredentialDto
     {
-        public int Id { get; set; }
-        [Required]
+        public int? Id { get; set; }
+        [Required(ErrorMessage = "Назва є обов'язковою.")]
         public string Name { get; set; } = null!;
         public string? Value { get; set; }
         public string? Description { get; set; }
-        public List<Project> Projects { get; set; } = new List<Project>();
     }
-
 }

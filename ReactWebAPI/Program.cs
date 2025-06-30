@@ -1,12 +1,14 @@
 ﻿using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using ReactWebAPI.Data;
+using ReactWebAPI.Profiles;
 using Shared.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(ApiMappingProfile).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

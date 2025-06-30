@@ -9,9 +9,11 @@ namespace ReactWebAPI.Data
            : base(options)
         {
         }
-        public DbSet<Employee> Employees { get; set; }
-        public DbSet<Project> Projects { get; set; }
-        public DbSet<WorkSession> WorkSessions { get; set; }
+        public DbSet<Project> Projects => Set<Project>();
+        public DbSet<Credential> Credentials => Set<Credential>();
+        public DbSet<Technology> Technologies => Set<Technology>();
+        public DbSet<Employee> Employees => Set<Employee>();
+        public DbSet<WorkSession> WorkSessions => Set<WorkSession>();
 
     }
 }

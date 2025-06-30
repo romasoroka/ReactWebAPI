@@ -1,11 +1,18 @@
-﻿namespace ReactWebAPI.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ReactWebAPI.Models
 {
     public class WorkSession
     {
         public int Id { get; set; }
-        public string Date { get; set; } = string.Empty;
-        public string Project { get; set; } = string.Empty;
-        public int Hours { get; set; }
-        public string Description { get; set; } = string.Empty;
+        public DateTime Date { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
+        [Required]
+        public string TaskDescription { get; set; } = null!;
+        public int ProjectId { get; set; }
+        public Project Project { get; set; } = null!;
+        public int EmployeeId { get; set; }
+        public Employee Employee { get; set; } = null!;
     }
 }
