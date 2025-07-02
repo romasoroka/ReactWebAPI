@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ReactWebAPI.Dtos
+namespace ReactApplication.Dtos
 {
     public class WorkSessionDto
     {

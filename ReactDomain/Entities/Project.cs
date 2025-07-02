@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace ReactWebAPI.Models
+namespace ReactDomain.Entities
 {
     public class Project
     {

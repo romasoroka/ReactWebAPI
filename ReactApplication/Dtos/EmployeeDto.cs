@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ReactWebAPI.Dtos
+namespace ReactApplication.Dtos
 {
     public class EmployeeDto
     {
@@ -9,9 +9,7 @@ namespace ReactWebAPI.Dtos
         public string FullName { get; set; } = null!;
         [Range(0, int.MaxValue, ErrorMessage = "Роки досвіду не можуть бути від'ємними.")]
         public int YearsOfExperience { get; set; }
-        public List<string> Skills { get; set; } = new();
-        [Required(ErrorMessage = "Email є обов'язковим.")]
-        [EmailAddress(ErrorMessage = "Невалідний формат email.")]
+        public List<string> Skills { get; set; } = new List<string>(); 
         public string Email { get; set; } = null!;
         public string? Phone { get; set; }
         public string? Bio { get; set; }

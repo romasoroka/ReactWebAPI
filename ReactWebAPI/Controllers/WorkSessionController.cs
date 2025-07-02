@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ReactWebAPI.Data;
-using ReactWebAPI.Dtos;
-using ReactWebAPI.Models;
+using ReactApplication.Application.Services;
+using ReactApplication.Dtos;
+using ReactApplication.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ReactWebAPI.Controllers
 {
@@ -11,113 +13,103 @@ namespace ReactWebAPI.Controllers
     [Route("api/[controller]")]
     public class WorkSessionsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IWorkSessionService _workSessionService;
         private readonly IMapper _mapper;
 
-        public WorkSessionsController(AppDbContext context, IMapper mapper)
+        public WorkSessionsController(IWorkSessionService workSessionService, IMapper mapper)
         {
-            _context = context;
+            _workSessionService = workSessionService;
             _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<WorkSessionDto>>> GetSessions()
+        public async Task<IActionResult> GetWorkSessions()
         {
-            var entities = await _context.WorkSessions
-                .Include(ws => ws.Project)
-                .Include(ws => ws.Employee)
-                .ToListAsync();
-            var dtos = _mapper.Map<List<WorkSessionDto>>(entities);
-
-            return Ok(dtos);
+            try
+            {
+                var workSessions = await _workSessionService.GetAllAsync();
+                return Ok(workSessions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при отриманні робочих сесій: " + ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<WorkSessionDto>> GetSession(int id)
+        public async Task<IActionResult> GetWorkSession(int id)
         {
-            var session = await _context.WorkSessions
-                .Include(ws => ws.Project)
-                .Include(ws => ws.Employee)
-                .FirstOrDefaultAsync(ws => ws.Id == id);
-            if (session == null) return NotFound();
-
-            return Ok(_mapper.Map<WorkSessionDto>(session));
+            try
+            {
+                var workSession = await _workSessionService.GetByIdAsync(id);
+                if (workSession == null)
+                    return NotFound("Робочу сесію з таким ID не знайдено.");
+                return Ok(workSession);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при отриманні робочої сесії: " + ex.Message);
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<WorkSessionDto>> CreateSession([FromBody] WorkSessionDto dto)
+        public async Task<IActionResult> CreateWorkSession([FromBody] WorkSessionDto dto)
         {
-            if (dto.ProjectId <= 0 || dto.EmployeeId <= 0)
+            try
             {
-                return BadRequest("ProjectId та EmployeeId повинні бути більше 0.");
+                var workSession = await _workSessionService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetWorkSession), new { id = workSession.Id }, workSession);
             }
-
-            var project = await _context.Projects.FindAsync(dto.ProjectId);
-            if (project == null)
+            catch (ArgumentException ex)
             {
-                return BadRequest($"Проєкт з ID {dto.ProjectId} не існує.");
+                return BadRequest(ex.Message);
             }
-
-            var employee = await _context.Employees.FindAsync(dto.EmployeeId);
-            if (employee == null)
+            catch (Exception ex)
             {
-                return BadRequest($"Працівник з ID {dto.EmployeeId} не існує.");
+                return StatusCode(500, "Виникла помилка при створенні робочої сесії: " + ex.Message);
             }
-
-            var entity = _mapper.Map<WorkSession>(dto);
-            entity.Project = project;
-            entity.Employee = employee;
-
-            _context.WorkSessions.Add(entity);
-            await _context.SaveChangesAsync();
-
-            var result = _mapper.Map<WorkSessionDto>(entity);
-            return CreatedAtAction(nameof(GetSession), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSession(int id, [FromBody] WorkSessionDto dto)
+        public async Task<IActionResult> UpdateWorkSession(int id, [FromBody] WorkSessionDto dto)
         {
-            var session = await _context.WorkSessions
-                .Include(ws => ws.Project)
-                .Include(ws => ws.Employee)
-                .FirstOrDefaultAsync(ws => ws.Id == id);
-            if (session == null) return NotFound();
-
-            if (dto.ProjectId <= 0 || dto.EmployeeId <= 0)
+            try
             {
-                return BadRequest("ProjectId та EmployeeId повинні бути більше 0.");
+                if (id != dto.Id)
+                    return BadRequest("ID робочої сесії в URL не відповідає ID у тілі запиту.");
+                await _workSessionService.UpdateAsync(id, dto);
+                return NoContent();
             }
-
-            var project = await _context.Projects.FindAsync(dto.ProjectId);
-            if (project == null)
+            catch (KeyNotFoundException)
             {
-                return BadRequest($"Проєкт з ID {dto.ProjectId} не існує.");
+                return NotFound("Робочу сесію з таким ID не знайдено.");
             }
-
-            var employee = await _context.Employees.FindAsync(dto.EmployeeId);
-            if (employee == null)
+            catch (ArgumentException ex)
             {
-                return BadRequest($"Працівник з ID {dto.EmployeeId} не існує.");
+                return BadRequest(ex.Message);
             }
-
-            _mapper.Map(dto, session);
-            session.Project = project;
-            session.Employee = employee;
-
-            await _context.SaveChangesAsync();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при оновленні робочої сесії: " + ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSession(int id)
+        public async Task<IActionResult> DeleteWorkSession(int id)
         {
-            var session = await _context.WorkSessions.FindAsync(id);
-            if (session == null) return NotFound();
-
-            _context.WorkSessions.Remove(session);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            try
+            {
+                await _workSessionService.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Робочу сесію з таким ID не знайдено.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при видаленні робочої сесії: " + ex.Message);
+            }
         }
     }
 }

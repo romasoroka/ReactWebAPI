@@ -1,15 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ReactWebAPI.Models
+namespace ReactDomain.Entities
 {
-    public class Credential
+    public class Technology
     {
         public int Id { get; set; }
         [Required]
         public string Name { get; set; } = null!;
-        public string? Value { get; set; }
-        public string? Description { get; set; }
         public List<Project> Projects { get; set; } = new List<Project>();
+        public List<Employee> Employees { get; set; } = new List<Employee>(); 
     }
-
 }

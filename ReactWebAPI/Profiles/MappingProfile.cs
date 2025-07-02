@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using ReactWebAPI.Dtos;
-using ReactWebAPI.Models;
+using ReactApplication.Dtos;
+using ReactDomain.Entities;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ReactWebAPI.Profiles
@@ -11,12 +11,15 @@ namespace ReactWebAPI.Profiles
         {
             // Employee <-> EmployeeDto
             CreateMap<Employee, EmployeeDto>()
-                 .ForMember(dest => dest.ProjectIds, opt => opt.MapFrom(src => src.Projects.Select(p => p.Id).ToList()))
-                 .ForMember(dest => dest.WorkSessions, opt => opt.MapFrom(src => src.WorkSessions));
+                .ForMember(dest => dest.ProjectIds, opt => opt.MapFrom(src => src.Projects.Select(p => p.Id).ToList()))
+                .ForMember(dest => dest.WorkSessions, opt => opt.MapFrom(src => src.WorkSessions))
+                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills.Select(t => t.Name).ToList()))
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl ?? string.Empty));
             CreateMap<EmployeeDto, Employee>()
                 .ForMember(dest => dest.Projects, opt => opt.Ignore())
-                .ForMember(dest => dest.WorkSessions, opt => opt.Ignore());
-            CreateMap<WorkSession, WorkSessionDto>().ReverseMap();
+                .ForMember(dest => dest.WorkSessions, opt => opt.Ignore())
+                .ForMember(dest => dest.Skills, opt => opt.Ignore()) // Skills обробляються в контролері
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl ?? string.Empty));
 
             // Project <-> ProjectDto
             CreateMap<ProjectDto, Project>()

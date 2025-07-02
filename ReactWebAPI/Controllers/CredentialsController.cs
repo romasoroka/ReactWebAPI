@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ReactWebAPI.Data;
-using ReactWebAPI.Dtos;
-using ReactWebAPI.Models;
+using ReactApplication.Application.Services;
+using ReactApplication.Dtos;
+using ReactApplication.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ReactWebAPI.Controllers
 {
@@ -11,88 +13,103 @@ namespace ReactWebAPI.Controllers
     [Route("api/[controller]")]
     public class CredentialsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICredentialService _credentialService;
         private readonly IMapper _mapper;
 
-        public CredentialsController(AppDbContext context, IMapper mapper)
+        public CredentialsController(ICredentialService credentialService, IMapper mapper)
         {
-            _context = context;
+            _credentialService = credentialService;
             _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CredentialDto>>> GetCredentials()
+        public async Task<IActionResult> GetCredentials()
         {
-            var credentials = await _context.Credentials
-                .ToListAsync();
-            var dtos = _mapper.Map<List<CredentialDto>>(credentials);
-            return Ok(dtos);
+            try
+            {
+                var credentials = await _credentialService.GetAllAsync();
+                return Ok(credentials);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при отриманні облікових даних: " + ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CredentialDto>> GetCredential(int id)
+        public async Task<IActionResult> GetCredential(int id)
         {
-            var credential = await _context.Credentials.FindAsync(id);
-            if (credential == null) return NotFound();
-
-            return Ok(_mapper.Map<CredentialDto>(credential));
+            try
+            {
+                var credential = await _credentialService.GetByIdAsync(id);
+                if (credential == null)
+                    return NotFound("Облікові дані з таким ID не знайдено.");
+                return Ok(credential);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при отриманні облікових даних: " + ex.Message);
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<CredentialDto>> CreateCredential([FromBody] CredentialDto dto)
+        public async Task<IActionResult> CreateCredential([FromBody] CredentialDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Name))
+            try
             {
-                return BadRequest("Назва облікових даних не може бути порожньою.");
+                var credential = await _credentialService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetCredential), new { id = credential.Id }, credential);
             }
-
-            var existingCredential = await _context.Credentials
-                .FirstOrDefaultAsync(c => c.Name == dto.Name && c.Value == dto.Value);
-            if (existingCredential != null)
+            catch (ArgumentException ex)
             {
-                return Conflict($"Облікові дані з назвою '{dto.Name}' і значенням '{dto.Value}' уже існують.");
+                return BadRequest(ex.Message);
             }
-
-            var credential = _mapper.Map<Credential>(dto);
-            _context.Credentials.Add(credential);
-            await _context.SaveChangesAsync();
-
-            var result = _mapper.Map<CredentialDto>(credential);
-            return CreatedAtAction(nameof(GetCredential), new { id = result.Id }, result);
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при створенні облікових даних: " + ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCredential(int id, [FromBody] CredentialDto dto)
         {
-            var credential = await _context.Credentials.FindAsync(id);
-            if (credential == null) return NotFound();
-
-            if (string.IsNullOrWhiteSpace(dto.Name))
+            try
             {
-                return BadRequest("Назва облікових даних не може бути порожньою.");
+                if (id != dto.Id)
+                    return BadRequest("ID облікових даних у URL не відповідає ID у тілі запиту.");
+                await _credentialService.UpdateAsync(id, dto);
+                return NoContent();
             }
-
-            var existingCredential = await _context.Credentials
-                .FirstOrDefaultAsync(c => c.Name == dto.Name && c.Value == dto.Value && c.Id != id);
-            if (existingCredential != null)
+            catch (KeyNotFoundException)
             {
-                return Conflict($"Облікові дані з назвою '{dto.Name}' і значенням '{dto.Value}' уже існують.");
+                return NotFound("Облікові дані з таким ID не знайдено.");
             }
-
-            _mapper.Map(dto, credential);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при оновленні облікових даних: " + ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCredential(int id)
         {
-            var credential = await _context.Credentials.FindAsync(id);
-            if (credential == null) return NotFound();
-
-            _context.Credentials.Remove(credential);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            try
+            {
+                await _credentialService.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Облікові дані з таким ID не знайдено.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при видаленні облікових даних: " + ex.Message);
+            }
         }
     }
 }

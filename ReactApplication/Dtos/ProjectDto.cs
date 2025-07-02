@@ -1,6 +1,6 @@
-﻿using ReactWebAPI.Models;
+﻿using ReactDomain.Entities;
 
-namespace ReactWebAPI.Dtos
+namespace ReactApplication.Dtos
 {
     public class ProjectDto
     {

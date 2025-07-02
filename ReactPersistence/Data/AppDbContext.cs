@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ReactWebAPI.Models;
+using ReactDomain.Entities;
 
-namespace ReactWebAPI.Data
+namespace ReactPersistence.Data
 {
     public class AppDbContext: DbContext
     {

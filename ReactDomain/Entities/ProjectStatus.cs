@@ -1,4 +1,4 @@
-﻿namespace ReactWebAPI.Models
+﻿namespace ReactDomain.Entities
 {
     public enum ProjectStatus
     {

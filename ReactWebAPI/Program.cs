@@ -1,6 +1,11 @@
 ﻿using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using ReactWebAPI.Data;
+using ReactApplication.Application.Services;
+using ReactApplication.Services;
+using ReactInfrastructure.Services;
+using ReactPersistence.Data;
+using ReactPersistence.Repositories;
+using ReactPersistence.Repositories.IRepositories;
 using ReactWebAPI.Profiles;
 using Shared.Events;
 
@@ -17,6 +22,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlOptions => sqlOptions.EnableRetryOnFailure()
     ));
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ICredentialService, CredentialService>();
+builder.Services.AddScoped<IWorkSessionService, WorkSessionService>();
+builder.Services.AddScoped<ITechnologyService, TechnologyService>();
+
+
 
 
 builder.Services.AddCors(options =>

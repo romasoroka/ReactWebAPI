@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ReactWebAPI.Data;
-using ReactWebAPI.Models;
+using ReactApplication.Application.Services;
+using ReactApplication.Dtos;
+using ReactApplication.Services;
+using ReactDomain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ReactWebAPI.Controllers
 {
@@ -10,86 +14,103 @@ namespace ReactWebAPI.Controllers
     [Route("api/[controller]")]
     public class TechnologiesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ITechnologyService _technologyService;
         private readonly IMapper _mapper;
 
-        public TechnologiesController(AppDbContext context, IMapper mapper)
+        public TechnologiesController(ITechnologyService technologyService, IMapper mapper)
         {
-            _context = context;
+            _technologyService = technologyService;
             _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Technology>>> GetTechnologies()
+        public async Task<IActionResult> GetTechnologies()
         {
-            var technologies = await _context.Technologies
-                .Select(t => new Technology { Id = t.Id, Name = t.Name })
-                .ToListAsync();
-            return Ok(technologies);
+            try
+            {
+                var technologies = await _technologyService.GetAllAsync();
+                return Ok(technologies);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при отриманні технологій: " + ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<string>> GetTechnology(int id)
+        public async Task<IActionResult> GetTechnology(int id)
         {
-            var technology = await _context.Technologies.FindAsync(id);
-            if (technology == null) return NotFound();
-            return Ok(technology.Name);
+            try
+            {
+                var technology = await _technologyService.GetByIdAsync(id);
+                if (technology == null)
+                    return NotFound("Технологію з таким ID не знайдено.");
+                return Ok(technology);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при отриманні технології: " + ex.Message);
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<string>> CreateTechnology([FromBody] string name)
+        public async Task<IActionResult> CreateTechnology([FromBody] Technology dto)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            try
             {
-                return BadRequest("Назва технології не може бути порожньою.");
+                var technology = await _technologyService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetTechnology), new { id = technology.Id }, technology);
             }
-
-            var existingTech = await _context.Technologies
-                .FirstOrDefaultAsync(t => t.Name == name);
-            if (existingTech != null)
+            catch (ArgumentException ex)
             {
-                return Conflict($"Технологія з назвою '{name}' уже існує.");
+                return BadRequest(ex.Message);
             }
-
-            var technology = new Technology { Name = name };
-            _context.Technologies.Add(technology);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetTechnology), new { id = technology.Id }, technology.Name);
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при створенні технології: " + ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTechnology(int id, [FromBody] string name)
+        public async Task<IActionResult> UpdateTechnology(int id, [FromBody] Technology dto)
         {
-            var technology = await _context.Technologies.FindAsync(id);
-            if (technology == null) return NotFound();
-
-            if (string.IsNullOrWhiteSpace(name))
+            try
             {
-                return BadRequest("Назва технології не може бути порожньою.");
+                if (id != dto.Id)
+                    return BadRequest("ID технології в URL не відповідає ID у тілі запиту.");
+                await _technologyService.UpdateAsync(id, dto);
+                return NoContent();
             }
-
-            var existingTech = await _context.Technologies
-                .FirstOrDefaultAsync(t => t.Name == name && t.Id != id);
-            if (existingTech != null)
+            catch (KeyNotFoundException)
             {
-                return Conflict($"Технологія з назвою '{name}' уже існує.");
+                return NotFound("Технологію з таким ID не знайдено.");
             }
-
-            technology.Name = name;
-            await _context.SaveChangesAsync();
-            return NoContent();
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при оновленні технології: " + ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTechnology(int id)
         {
-            var technology = await _context.Technologies.FindAsync(id);
-            if (technology == null) return NotFound();
-
-            _context.Technologies.Remove(technology);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            try
+            {
+                await _technologyService.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Технологію з таким ID не знайдено.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Виникла помилка при видаленні технології: " + ex.Message);
+            }
         }
     }
 }

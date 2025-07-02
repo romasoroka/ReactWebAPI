@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace ReactWebAPI.Models
+namespace ReactDomain.Entities
 {
     public class Employee
     {
@@ -18,6 +18,7 @@ namespace ReactWebAPI.Models
         public int ReportsSubmitted { get; set; }
         public int ProjectsInvolved { get; set; }
         public List<Project> Projects { get; set; } = new List<Project>();
+        public List<Technology> Skills { get; set; } = new List<Technology>();
         public ICollection<WorkSession> WorkSessions { get; set; } = new List<WorkSession>();
     }
 }
