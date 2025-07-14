@@ -6,4 +6,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+  </ItemGroup>
+
+
+	<ItemGroup>
+		<Protobuf Include="Protos/*.proto" ProtoRoot="Protos" GrpcServices="Both"/>
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Google.Protobuf" Version="3.31.1" />
+		<PackageReference Include="Grpc.Tools" Version="2.72.0" PrivateAssets="All"/>
+		<PackageReference Include="Grpc.Core.Api" Version="2.71.0"/>
+	</ItemGroup>
+	
 </Project>

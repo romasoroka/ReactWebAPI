@@ -13,9 +13,9 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["ReactWebAPI/ReactWebAPI.csproj", "ReactWebAPI/"]
-COPY ["ReactApplication/ReactApplication.csproj", "ReactApplication/"]
-COPY ["ReactDomain/ReactDomain.csproj", "ReactDomain/"]
-COPY ["ReactPersistence/ReactPersistence.csproj", "ReactPersistence/"]
+COPY ["React.Application/React.Application.csproj", "React.Application/"]
+COPY ["React.Domain/React.Domain.csproj", "React.Domain/"]
+COPY ["React.Infrastructure/React.Infrastructure.csproj", "React.Infrastructure/"]
 COPY ["Shared/Shared.csproj", "Shared/"]
 RUN dotnet restore "./ReactWebAPI/ReactWebAPI.csproj"
 COPY . .

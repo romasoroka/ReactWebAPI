@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package ProjectService;
+
+service ProjectService { 
+	rpc GetAllProjects (Empty) returns (ProjectList) {} 
+	rpc GetProject (ProjectId) returns (Project) {} 
+	rpc CreateProject (Project) returns (Project) {} 
+	rpc UpdateProject (Project) returns (Empty) {} 
+	rpc DeleteProject (ProjectId) returns (Empty) {} }
+
+message Empty {}
+
+message ProjectId { int32 id = 1; }
+
+message Project { 
+		int32 id = 1; 
+		string name = 2; 
+		ProjectStatus status = 3; 
+		repeated int32 technology_ids = 4; 
+		string description = 5; 
+		string detailed_description = 6; 
+		int64 start_date = 7;  
+		int64 end_date = 8; 
+		double budget = 9; 
+		string client = 10; 
+		repeated Credential credentials = 11; 
+		int32 total_hours_logged = 12; 
+		int32 report_count = 13; 
+		int32 active_employees = 14; 
+		repeated int32 employee_ids = 15; 
+		repeated string employee_names = 16; 
+	}
+
+message ProjectList { repeated Project projects = 1; }
+
+message Credential { int32 id = 1; string name = 2; string value = 3; string description = 4; }
+
+enum ProjectStatus { NOT_STARTED = 0; IN_PROGRESS = 1; COMPLETED = 2; ON_HOLD = 3; }

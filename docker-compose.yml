@@ -34,6 +34,22 @@ services:
     networks:
       - appnetwork
 
+
+  projectgrpc:
+    build:
+      context: .
+      dockerfile: React.ProjectService.gRPC/Dockerfile
+    container_name: projectgrpc
+    depends_on:
+      - sqlserver
+      - kafka
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "6000:8080"   
+    networks:
+      - appnetwork
+
   webapi:
     build:
       context: .

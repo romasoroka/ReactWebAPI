@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option csharp_namespace = "Shared.Services";
+
+package project_service;
+
+
+service ProjectService { 
+	rpc GetAllProjects (EmptyRequest) returns (ProjectListRequest) {} 
+	rpc GetProject (ProjectIdRequest) returns (ProjectRequest) {} 
+	rpc CreateProject (ProjectRequest) returns (ProjectRequest) {} 
+	rpc UpdateProject (ProjectRequest) returns (EmptyRequest) {} 
+	rpc DeleteProject (ProjectIdRequest) returns (EmptyRequest) {} }
+
+message EmptyRequest {}
+
+message ProjectIdRequest { int32 id = 1; }
+
+message ProjectRequest { 
+		int32 id = 1; 
+		string name = 2; 
+		ProjectStatus status = 3; 
+		repeated int32 technology_ids = 4; 
+		string description = 5; 
+		string detailed_description = 6; 
+		int64 start_date = 7;  
+		int64 end_date = 8; 
+		double budget = 9; 
+		string client = 10; 
+		repeated CredentialRequest credentials = 11; 
+		int32 total_hours_logged = 12; 
+		int32 report_count = 13; 
+		int32 active_employees = 14; 
+		repeated int32 employee_ids = 15; 
+		repeated string employee_names = 16; 
+	}
+
+message ProjectListRequest { repeated ProjectRequest projects = 1; }
+
+message CredentialRequest { int32 id = 1; string name = 2; string value = 3; string description = 4; }
+
+enum ProjectStatus { NOT_STARTED = 0; IN_PROGRESS = 1; COMPLETED = 2; ON_HOLD = 3; }
